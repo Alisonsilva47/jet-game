@@ -152,3 +152,137 @@ def main_menu():
                 pygame.display.update()
                 pygame.display.set_caption("VELOCIDADE DO JET" + str(int(clock.get_fps())) + "POR SEGUNDO")
                 clock.tick(FPS)
+
+def pause():
+    global highscore_file
+    global highscore_int
+
+    paused = True
+
+    player.moving_up = False
+    player.moving_left = False
+    player.moving_down = False
+    player.moving_right = False
+
+    paused_text = message_to_screen("JOGO PAUSADO", font, 100, black)
+    paused_text_rect = paused_text.get_rect()
+    game_display.blit(paused_text, (display_width/2 - (paused_text_rect[2]/2), 40))
+
+    pygame.display.update()
+    clock.tick(15)
+
+    while(paused):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                if (score > highscore_int):
+                    highscore_file = open('highscore.dat', "w")
+                    highscore_file.write(str(score))
+                    pygame.quit()
+                    quit()
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_p:
+                        pygame.mixer.Sound.play(select)
+                        paused = False
+
+def game_loop():
+    global spaceship_x
+    global spaceship_y
+    global spaceship_alive
+    global spaceship_hit_player
+    global warning
+    global warning_counter
+    global warning_once
+
+    global bullets
+    global moving
+
+    global highscore_file
+    global highscore_int
+    global score
+
+    global cloud_x
+    global cloud_y
+
+    global enemy_heli_alive
+    global boat_alive
+
+    game_exit = False
+    game_over = False
+
+    game_over_selected = "JOGAR NOVAMENTE"
+
+    while (not game_exit):
+        while (game_over):
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    if (score > highscore_int):
+                        highscore_file = open('highscore.dat', "w")
+                        highscore_file.write(str(score))
+                        pygame.quit()
+                        quit()
+
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_w or event.key == pygame.K_UP:
+                            pygame.mixer.Sound.play(select)
+                            game_over_selected = "JOGAR NOVAMENTE"
+                            
+                        elif event.key == pygame.K_s or event.key == pygame.K_DOWN:
+                            pygame.mixer.Sound.play(select)
+                            game_over_selected = "QUIT"
+
+                        if event.key == pygame.K_SPACE or event.key == pygame.K_RETURN:
+                            pygame.mixer.Sound.play(select2)
+                            if (game_over_selected == "JOGAR NOVAMENTE"):
+                                if (score > highscore_int):
+                                    highscore_file = open('highscore.dat',"w")
+                                    highscore_file.write(str(score))
+                                    highscore_file.close()
+                                    game_over = False
+
+                                    score = 0
+
+                                    ballon_x = 800
+
+                                    enemy_heli.x = -100
+                                    enemy_heli_alive = False
+
+                                    enemy_heli.bullets = []
+
+                                    boat.x = -110
+                                    boat_alive = False
+                                    boat.bullets = []
+
+                                    spaceship_x = 800
+                                    spaceship_alive = False
+                                    warning = False
+                                    warning_counter = 0
+                                    warning_counter = 0
+
+                                    player.wreck_start = False
+                                    player.y = display_height/2-40
+                                    player.x = 100
+                                    player.wrecked = False
+                                    player.health = 3
+                                    bullets = []
+
+                                    game_loop()
+                            if (game_over_selected == "quit"):
+                                pygame.quit()
+                                quit()
+
+
+                                    
+                                    
+
+
+                            
+
+
+
+
+
+    
+
+
+
