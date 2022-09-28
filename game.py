@@ -1,5 +1,5 @@
 import pygame
-import helicopter
+import jet
 import enemy_heli
 import boat
 import sprites
@@ -45,7 +45,7 @@ clock = pygame.time.Clock()
 FPS = 30
 
 # player variables
-player = helicopter.Helicopter(100, display_height / 2 - 40)
+player = jet.Jet(100, display_height / 2 - 40)
 moving = True
 godmode = False
 
@@ -58,12 +58,12 @@ highscore_int = int(highscore_file.read())
 cloud_x = 800
 cloud_y = random.randint(0, 400)
 
-# enemy helicopter variables
+# enemy jet variables
 enemy_heli = enemy_heli.EnemyHeli(-100, display_height/2-40)
 enemy_heli_alive = False
 
 # boat variables
-boat = boat.Boat(-110, 430)
+boat = boat.Boat(-1100, 507)
 boat_alive = False
 
 # spaceship variables
@@ -79,6 +79,13 @@ warning_message = message_to_screen("!", font, 200, red)
 # balloon variables
 balloon_x = 800
 balloon_y = random.randint(0, 400)
+
+heart_x = 800
+heart_y = random.randint(0, 400)
+heart_hit_player = False
+current_heart_score = 100
+
+new_heart = False
 
 # bullet variables
 bullets = []
@@ -130,7 +137,7 @@ def main_menu():
                         quit()
 
         # drawing background
-        game_display.blit(sprites.background, (0, 0))
+        game_display.blit(sprites.background_blur, (0, 0))
 
         game_display.blit(sprites.cloud, (cloud_x, cloud_y))
         if cloud_x <= 800 - 1100:
@@ -166,8 +173,9 @@ def main_menu():
         game_display.blit(controls_2, (display_width / 2 - (controls_2_rect[2] / 2), 140))
         game_display.blit(play, (display_width / 2 - (play_rect[2] / 2), 200))
         game_display.blit(game_quit, (display_width / 2 - (quit_rect[2] / 2), 260))
-        # drawing ocean
-        pygame.draw.rect(game_display, blue, (0, 500, 800, 100))
+        # drawing ground
+        # game_display.blit(sprites.ground, (0, 500, 800, 100))
+        # pygame.draw.rect(game_display, blue, (0, 500, 800, 100))
 
         pygame.display.update()
         pygame.display.set_caption("JETGAME running at " + str(int(clock.get_fps())) + " frames per second.")
@@ -232,6 +240,14 @@ def game_loop():
     global balloon_x
     global balloon_y
 
+    global new_heart
+
+    global heart_x
+    global heart_y
+    global heart_hit_player
+
+    global current_heart_score
+
     global enemy_heli_alive
 
     global boat_alive
@@ -277,7 +293,7 @@ def game_loop():
                             enemy_heli_alive = False
                             enemy_heli.bullets = []
 
-                            boat.x = -110
+                            boat.x = -900
                             boat_alive = False
                             boat.bullets = []
 
@@ -292,6 +308,7 @@ def game_loop():
                             player.x = 100
                             player.wrecked = False
                             player.health = 3
+                            player.restart_jet()
                             bullets = []
 
                             game_loop()
@@ -389,7 +406,7 @@ def game_loop():
         # drawing player
         game_display.blit(player.current, (player.x, player.y))
 
-        # drawing enemy helicopter
+        # drawing enemy jet
         game_display.blit(enemy_heli.current, (enemy_heli.x, enemy_heli.y))
 
         # drawing spaceship
@@ -447,29 +464,50 @@ def game_loop():
 
         # draw randomly positioned balloons, pop if they hit any bullet or bombs
         for pop_balloon in bullets:
-            if balloon_x < pop_balloon[0] + 90 < balloon_x + 70 and balloon_y < pop_balloon[1] + 40 < balloon_y + 100:
+            if balloon_x < pop_balloon[0] + 90 < balloon_x + 70 and balloon_y < pop_balloon[1] + 40 < balloon_y + 30:
                 pygame.mixer.Sound.play(pop)
                 bullets.remove(pop_balloon)
-                balloon_x = 800 - 870
+                balloon_x = -150
                 score += 50
-            elif balloon_x < pop_balloon[0] + 100 < balloon_x + 70 and balloon_y < pop_balloon[
-                1] + 50 < balloon_y + 100:
+            elif balloon_x < pop_balloon[0] + 100 < balloon_x + 70 and balloon_y < pop_balloon[1] + 50 < balloon_y + 30:
                 pygame.mixer.Sound.play(pop)
                 bullets.remove(pop_balloon)
-                balloon_x = 800 - 870
+                balloon_x = -150
                 score += 50
 
         for pop_balloon in bombs:
             if balloon_x < pop_balloon[0] + 55 < balloon_x + 70 and balloon_y < pop_balloon[1] + 70 < balloon_y + 100:
                 pygame.mixer.Sound.play(pop)
                 bombs.remove(pop_balloon)
-                balloon_x = 800 - 870
+                balloon_x = -150
                 score += 50
             elif balloon_x < pop_balloon[0] + 75 < balloon_x + 70 and balloon_y < pop_balloon[1] + 90 < balloon_y + 100:
                 pygame.mixer.Sound.play(pop)
                 bombs.remove(pop_balloon)
-                balloon_x = 800 - 870
+                balloon_x = -150
                 score += 50
+
+        
+        # spawn heart randomly
+        if (score >= current_heart_score ):
+            new_heart = True
+            current_heart_score += 100
+            #game_display.blit(sprites.heart, (130, 200))
+                    
+        if new_heart:
+            print('entrou no outro')
+            heart_x -= 8
+            #game_display.blit(sprites.heart, (800, random.randint(0, 400)))
+            game_display.blit(sprites.heart, ((heart_x, heart_y)))
+  
+ 
+        if heart_x < 0 - 100:
+            print('AAAAAAAAAAAAAA')
+            heart_hit_player = False
+            new_heart = False
+            heart_x = 800
+            heart_y = random.randint(0, 400)
+            
 
         # spawn spaceship randomly
         spaceship_spawn_num = random.randint(0, 100)
@@ -500,7 +538,7 @@ def game_loop():
             spaceship_x = 800
             spaceship_y = random.randint(0, 400)
 
-        # spawn enemy helicopter randomly
+        # spawn enemy jet randomly
         enemy_spawn_num = random.randint(0, 100)
         if not enemy_heli_alive and score > 250 and enemy_spawn_num == 50:
             enemy_heli_alive = True
@@ -508,19 +546,19 @@ def game_loop():
 
         # spawn boat randomly
         boat_spawn_num = random.randint(0, 200)
-        if score > 700 and boat_spawn_num == 100 and not boat_alive:
+        if score > 100 and boat_spawn_num == 100 and not boat_alive:
             boat.x = 800
             boat_alive = True
 
-        if boat.x <= -110:
+        if boat.x <= -500:
             boat_alive = False
 
         # enemy-player bullet collision detection
         for hit_enemy_heli in bullets:
             if enemy_heli.x < hit_enemy_heli[0] + 90 < enemy_heli.x + 100 \
                     or enemy_heli.x < hit_enemy_heli[0] + 100 < enemy_heli.x + 100:
-                if enemy_heli.y < hit_enemy_heli[1] + 40 < enemy_heli.y + 80 \
-                        or enemy_heli.y < hit_enemy_heli[1] + 50 < enemy_heli.y + 80:
+                if enemy_heli.y < hit_enemy_heli[1] + 40 < enemy_heli.y + 110 \
+                        or enemy_heli.y < hit_enemy_heli[1] + 50 < enemy_heli.y + 110:
                     if not enemy_heli.x > 600:
                         pygame.mixer.Sound.play(explosion2)
                         score += 150
@@ -566,7 +604,7 @@ def game_loop():
                         bullets.remove(hit_boat)
                         score += 200
                         boat_alive = False
-                        boat.x = -110
+                        boat.x = -1000
 
         for hit_boat in bombs:
             if boat.x < hit_boat[0] + 55 < boat.x + 110 or boat.x < hit_spaceship[0] + 75 < boat.x + 110:
@@ -576,15 +614,15 @@ def game_loop():
                         bombs.remove(hit_boat)
                         score += 200
                         boat_alive = False
-                        boat.x = -110
+                        boat.x = -1000
 
         # player-ballon collision detection
-        if balloon_x < player.x < balloon_x + 70 or balloon_x < player.x + 100 < balloon_x + 70:
-            if balloon_y < player.y < balloon_y + 80 or balloon_y < player.y + 80 < balloon_y + 80:
+        if balloon_x < player.x < balloon_x + 60 or balloon_x < player.x + 60 < balloon_x + 60:
+            if balloon_y < player.y < balloon_y + 30 or balloon_y < player.y + 70 < balloon_y + 70:
                 pygame.mixer.Sound.play(explosion)
                 player.damaged = True
                 player.health -= 1
-                balloon_x = 800 - 870
+                balloon_x = -100
 
         # player-enemy rocket collision detection
         for hit_player in enemy_heli.bullets:
@@ -598,7 +636,7 @@ def game_loop():
         # player-boat bullet collision detection
         for hit_player in boat.bullets:
             if player.x < hit_player[0] < player.x + 100 or player.x < hit_player[0] + 20 < player.x + 100:
-                if player.y < hit_player[1] < player.y + 80 or player.y < hit_player[1] + 20 < player.y + 80:
+                if player.y < hit_player[1] < player.y + 30 or player.y < hit_player[1] + 20 < player.y + 30:
                     pygame.mixer.Sound.play(explosion)
                     if not boat.boat_hit_player:
                         player.damaged = True
@@ -623,8 +661,18 @@ def game_loop():
                     player.health -= 1
                     spaceship_hit_player = True
 
-        game_display.blit(sprites.balloon, (balloon_x, balloon_y))
-        if balloon_x <= 800 - 870:
+        # player-heart collision detection
+        if heart_x < player.x < heart_x + 80 or heart_x < player.x + 80 < heart_x + 80:
+            if heart_y < player.y < heart_y + 88 or heart_y < player.y + 80 < heart_y + 88:
+                if not heart_hit_player:
+                    pygame.mixer.Sound.play(explosion)
+                    if (player.health < 5):
+                        player.health += 1
+                    heart_x -= 500
+                    heart_hit_player = True
+
+        game_display.blit(sprites.atomic_bomb, (balloon_x, balloon_y))
+        if balloon_x <= -300:
             balloon_x = 800
             balloon_y = random.randint(0, 400)
         else:
@@ -657,6 +705,11 @@ def game_loop():
                 game_display.blit(sprites.icon, (10 + 32 + 10, 50))
                 if player.health >= 3:
                     game_display.blit(sprites.icon, (10 + 32 + 10 + 32 + 10, 50))
+                    if player.health >= 4:
+                        game_display.blit(sprites.icon, (10 + 32 + 10 + 32 + 10 + 32 + 10, 50))
+                        if player.health >= 5:
+                            game_display.blit(sprites.icon, (10 + 32 + 10 + 32 + 10 + 32 + 10 + 32 + 10, 50))
+                    
 
         # god-mode (for quicker testing)
         if godmode:
@@ -664,7 +717,8 @@ def game_loop():
             player.health = 3
 
         # drawing ocean
-        pygame.draw.rect(game_display, blue, (0, 500, 800, 100))
+        #game_display.blit(sprites.ground, (0, 500, 800, 100))
+        #pygame.draw.rect(game_display, blue, (0, 500, 800, 100))
 
         pygame.display.update()
 

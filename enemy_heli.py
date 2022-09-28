@@ -10,7 +10,7 @@ class EnemyHeli(object):
 
     animation_number = 0
     counter = 0
-    current = sprites.enemy_helicopter_list[animation_number]
+    current = sprites.enemy_jet_list[animation_number]
     crash_counter = 0
     wreck_start = False
     wrecked = False
@@ -52,11 +52,11 @@ class EnemyHeli(object):
         self.counter += 1
         if self.counter == 2:
             if self.next_0:
-                self.current = sprites.enemy_helicopter_list[0]
+                self.current = sprites.enemy_jet_list[0]
                 self.next_0 = False
                 self.next_1 = True
             elif self.next_1:
-                self.current = sprites.enemy_helicopter_list[1]
+                self.current = sprites.enemy_jet_list[1]
                 self.next_1 = False
                 self.next_0 = True
 
