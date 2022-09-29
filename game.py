@@ -1,3 +1,10 @@
+import os, sys
+dirpath = os.getcwd()
+sys.path.append(dirpath)
+if getattr(sys, "frozen", False):
+    os.chdir(sys._MEIPASS)
+###
+
 import pygame
 import jet
 import enemy_jet
@@ -305,7 +312,7 @@ def game_loop():
                             enemy_jet_alive = False
                             enemy_jet.bullets = []
 
-                            tank.x = -900
+                            tank.x = -1200
                             tank_alive = False
                             tank.bullets = []
 
@@ -400,6 +407,15 @@ def game_loop():
         if player.health < 1:
             pygame.mixer.Sound.play(explosion)
             player.wreck()
+
+        elif (player.health == 2):
+            player.jet_break_1()
+
+        elif (player.health == 1):
+            player.jet_break_2()
+
+        elif (player.health >= 3):
+            player.restart_jet()
 
         if player.wrecked:
             game_over = True
@@ -555,9 +571,9 @@ def game_loop():
             enemy_jet.x = 800
 
         # spawn tank randomly
-        tank_spawn_num = random.randint(0, 200)
-        if score > 100 and tank_spawn_num == 100 and not tank_alive:
-            tank.x = 800
+        tank_spawn_num = random.randint(0, 300)
+        if score > 300 and tank_spawn_num == 100 and not tank_alive:
+            tank.x = 850
             tank_alive = True
 
         if tank.x <= -500:
@@ -578,10 +594,10 @@ def game_loop():
 
         # spaceship-player bullet/bomb collision detection
         for hit_spaceship in bullets:
-            if spaceship_x < hit_spaceship[0] + 90 < spaceship_x + 100 \
-                    or spaceship_x < hit_spaceship[0] + 100 < spaceship_x + 100:
-                if spaceship_y < hit_spaceship[1] + 40 < spaceship_y + 80 \
-                        or spaceship_y < hit_spaceship[1] + 50 < spaceship_y + 80:
+            if spaceship_x < hit_spaceship[0] + 50 < spaceship_x + 50 \
+                    or spaceship_x < hit_spaceship[0] + 50 < spaceship_x + 50:
+                if spaceship_y < hit_spaceship[1] + 40 < spaceship_y + 30 \
+                        or spaceship_y < hit_spaceship[1] + 50 < spaceship_y + 30:
                     if not spaceship_x > 700:
                         pygame.mixer.Sound.play(explosion2)
                         bullets.remove(hit_spaceship)
@@ -645,7 +661,7 @@ def game_loop():
 
         # player-tank bullet collision detection
         for hit_player in tank.bullets:
-            if player.x < hit_player[0] < player.x + 100 or player.x < hit_player[0] + 20 < player.x + 100:
+            if player.x < hit_player[0] < player.x + 70 or player.x < hit_player[0] + 20 < player.x + 70:
                 if player.y < hit_player[1] < player.y + 30 or player.y < hit_player[1] + 20 < player.y + 30:
                     pygame.mixer.Sound.play(explosion)
                     if not tank.tank_hit_player:
@@ -663,10 +679,11 @@ def game_loop():
                     tank.tank_hit_player = True
 
         # player-spaceship collision detection
-        if spaceship_x < player.x < spaceship_x + 100 or spaceship_x < player.x + 100 < spaceship_x + 100:
-            if spaceship_y < player.y < spaceship_y + 88 or spaceship_y < player.y + 80 < spaceship_y + 88:
+        if spaceship_x < player.x < spaceship_x + 50 or spaceship_x < player.x + 50 < spaceship_x + 50:
+            if spaceship_y < player.y < spaceship_y + 30 or spaceship_y < player.y + 30 < spaceship_y + 30:
                 if not spaceship_hit_player:
                     pygame.mixer.Sound.play(explosion)
+                    spaceship_x = -100
                     player.damaged = True
                     player.health -= 1
                     spaceship_hit_player = True

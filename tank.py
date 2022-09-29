@@ -15,7 +15,7 @@ class Tank(object):
         self.y = y
 
     def movement(self):
-        if self.x > -200:
+        if self.x > -500:
             self.x -= 2
         else:
             self.tank_hit_player = False

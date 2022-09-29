@@ -46,6 +46,12 @@ class Jet(object):
     def restart_jet(self):
         self.current = sprites.jet_1
 
+    def jet_break_1(self):
+        self.current = sprites.jet_damaged_1
+    
+    def jet_break_2(self):
+        self.current = sprites.jet_damaged_2
+
     def blink_red(self):
         self.animation_list = sprites.damage_jet_list
         self.damaged_counter += 1
